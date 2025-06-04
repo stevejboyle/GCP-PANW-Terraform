@@ -6,5 +6,8 @@
 .terraform.lock.hcl
 *.tfvars.backup
 
+# Keys
+gcp.key.*
+
 # OS
 .DS_Store

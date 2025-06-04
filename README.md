@@ -1,26 +1,25 @@
 
-# Terraform VM-Series Multi-Instance Deployment (Fully Automated)
+# Terraform VM-Series Multi-Instance Deployment
 
-This repository provides a fully modular, scalable, and environment-isolated Terraform configuration to deploy Palo Alto VM-Series instances on Google Cloud.
+Fully automated, fully validated Terraform deployment for Palo Alto VM-Series on GCP.
 
 ---
 
-## ✅ Features
+## Features
 
 - Multi-environment (`dev`, `test`, `prod`)
-- Multi-instance (independent deployments per instance)
-- Fully isolated Terraform state (local state)
-- Validated variables with safety checks
-- Automated SSH key management
-- `block-project-ssh-keys` enabled for security
-- Automation scripts for instance creation
-- Makefile automation for easy operations
+- Multi-instance (deploy independently per instance)
+- Fully validated `variables.tf` (strict type + regex validation)
+- SSH key injection (via `ssh_public_keys`)
+- Block project-wide SSH keys for security (`block-project-ssh-keys = true`)
+- Automation scripts to easily generate new instances
+- Makefile automation for `terraform init`, `plan`, `apply`, etc.
 
 ---
 
-## 🚀 Quick Usage
+## Usage
 
-### Deploy instance:
+### Apply instance:
 
 ```bash
 make apply ENV=dev INSTANCE=vm-01
@@ -29,7 +28,13 @@ make apply ENV=dev INSTANCE=vm-01
 ### Destroy instance:
 
 ```bash
-make destroy ENV=test INSTANCE=vm-03
+make destroy ENV=prod INSTANCE=vm-03
+```
+
+### Validate config:
+
+```bash
+make validate ENV=test INSTANCE=vm-02
 ```
 
 ### Create new instance automatically:
@@ -38,18 +43,43 @@ make destroy ENV=test INSTANCE=vm-03
 make create-instance ENV=dev INSTANCE=vm-04
 ```
 
-### Validate configuration:
+---
+
+## Directory Structure
+
+- `modules/vmseries/` — core reusable VM module
+- `environments/{env}/{instance}/` — isolated instance deployments
+- `automation-scripts/` — helper automation scripts
+- `Makefile` — one-command automation interface
+
+---
+
+## Notes
+
+- SSH public keys are injected using `ssh_public_keys` variable (see `terraform.tfvars` for example).
+- Project-wide SSH keys are fully disabled via instance metadata.
+
+---
+
+## Requirements
+
+- Terraform >= 1.3.0
+- GCP project access + credentials
+- GCP Compute Engine API enabled
+
+---
+
+## Repo Initialization
 
 ```bash
-make validate ENV=dev INSTANCE=vm-01
+terraform init
+terraform validate
 ```
 
 ---
 
-## 🔑 SSH Keys
+## Team Contact
 
-SSH public keys are injected through `ssh_public_keys` variable.
-Your provided key has been pre-wired.
+Infra team: `Terraform VM-Series Owners`
 
 ---
-

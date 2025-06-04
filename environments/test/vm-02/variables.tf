@@ -92,7 +92,7 @@ variable "service_account_email" {
   type        = string
   description = "Service account to attach"
   validation {
-    condition     = can(regex("@.*\.gserviceaccount\.com$", var.service_account_email))
+    condition     = can(regex("@.*\\.gserviceaccount\\.com$", var.service_account_email))
     error_message = "Must be a valid service account email."
   }
 }

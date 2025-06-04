@@ -23,7 +23,13 @@ resource "google_compute_instance" "this" {
     mode = "READ_WRITE"
   }
 
-  metadata = var.metadata
+  metadata = merge(
+    var.metadata,
+    {
+      ssh-keys = join("\n", var.ssh_public_keys)
+      block-project-ssh-keys = "true"
+    }
+  )
 
   dynamic "network_interface" {
     for_each = var.network_interfaces

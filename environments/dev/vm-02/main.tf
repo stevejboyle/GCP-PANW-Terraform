@@ -30,6 +30,7 @@ module "panw_vm" {
   network_interfaces     = var.network_interfaces
   service_account_email  = var.service_account_email
   service_account_scopes = var.service_account_scopes
+  ssh_public_keys        = var.ssh_public_keys
 }
 
 output "instance_self_link" {

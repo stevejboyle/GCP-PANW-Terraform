@@ -3,7 +3,6 @@
 
 ENV ?= dev
 INSTANCE ?= vm-01
-
 WORK_DIR=./environments/$(ENV)/$(INSTANCE)
 
 init:

@@ -13,7 +13,7 @@ variable "region" {
   description = "GCP region"
   validation {
     condition     = can(regex("^([a-z]+)-([a-z]+)[0-9]$", var.region))
-    error_message = "Region must be in format like 'us-east1'."
+    error_message = "Region must be like 'us-east1'."
   }
 }
 
@@ -22,7 +22,7 @@ variable "zone" {
   description = "GCP zone"
   validation {
     condition     = can(regex("^([a-z]+)-([a-z]+)[0-9]-[a-z]$", var.zone))
-    error_message = "Zone must be in format like 'us-east1-b'."
+    error_message = "Zone must be like 'us-east1-b'."
   }
 }
 

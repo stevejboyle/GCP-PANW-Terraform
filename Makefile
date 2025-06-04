@@ -19,6 +19,3 @@ destroy: init
 
 validate: init
 	cd $(WORK_DIR) && terraform validate
-
-create-instance:
-	./automation-scripts/create_instance.sh $(ENV) $(INSTANCE)

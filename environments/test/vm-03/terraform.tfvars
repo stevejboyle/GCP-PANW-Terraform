@@ -46,7 +46,3 @@ service_account_scopes = [
   "https://www.googleapis.com/auth/logging.write",
   "https://www.googleapis.com/auth/monitoring.write"
 ]
-
-ssh_public_keys = [
-  "admin:${file("${path.root}/../../../../gcp.key.pub")} admin"
-]

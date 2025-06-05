@@ -46,4 +46,4 @@ service_account_scopes = [
   "https://www.googleapis.com/auth/logging.write",
   "https://www.googleapis.com/auth/monitoring.write"
 ]
-disk_encryption_key = "PA-VM-Disk-Crypt"
+disk_encryption_key_name = "PA-VM-Disk-Crypt"

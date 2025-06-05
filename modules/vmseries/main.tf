@@ -1,4 +1,8 @@
 
+locals {
+  disk_encryption_key_full = var.disk_encryption_key_name != null ? "projects/${var.project}/locations/${var.region}/keyRings/${var.disk_encryption_keyring}/cryptoKeys/${var.disk_encryption_key_name}" : null
+}
+
 resource "google_compute_disk" "boot_disk" {
   name  = "${var.instance_name}-boot-disk"
   type  = var.boot_disk_type
@@ -6,7 +10,7 @@ resource "google_compute_disk" "boot_disk" {
   size  = var.boot_disk_size
 
   dynamic "disk_encryption_key" {
-    for_each = var.disk_encryption_key != null ? [var.disk_encryption_key] : []
+    for_each = local.disk_encryption_key_full != null ? [local.disk_encryption_key_full] : []
     content {
       kms_key_self_link = disk_encryption_key.value
     }
@@ -32,12 +36,7 @@ resource "google_compute_instance" "this" {
     source      = google_compute_disk.boot_disk.id
   }
 
-  metadata = {
-    mgmt-interface-swap    = lookup(var.metadata, "mgmt-interface-swap", "enable")
-    serial-port-enable     = lookup(var.metadata, "serial-port-enable", "true")
-    ssh-keys               = join("\n", var.ssh_public_keys)
-    block-project-ssh-keys = "true"
-  }
+  metadata = var.metadata
 
   dynamic "network_interface" {
     for_each = var.network_interfaces

@@ -108,13 +108,14 @@ variable "ssh_key_file" {
   default     = "gcp.key.pub"
 }
 
-variable "ssh_public_keys" {
-  type = list(string)
-  description = "List of SSH public keys (required)"
+variable "disk_encryption_key_name" {
+  type        = string
+  description = "Optional KMS disk encryption key name (only key name, not full resource ID)"
+  default     = null
 }
 
-variable "disk_encryption_key" {
+variable "disk_encryption_keyring" {
   type        = string
-  description = "Optional KMS disk encryption key resource ID"
-  default     = null
+  description = "KMS key ring name"
+  default     = "US-East-1-KeyRing"
 }

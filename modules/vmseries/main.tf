@@ -7,15 +7,15 @@ resource "google_compute_instance" "this" {
 
   boot_disk {
     initialize_params {
-      source_image = var.source_image
-      size         = var.boot_disk_size
-      type         = var.boot_disk_type
+      image  = var.source_image
+      size   = var.boot_disk_size
+      type   = var.boot_disk_type
     }
   }
 
   network_interface {
-    subnetwork  = var.network_interfaces[0].subnetwork
-    stack_type  = var.network_interfaces[0].stack_type
+    subnetwork = var.network_interfaces[0].subnetwork
+    stack_type = var.network_interfaces[0].stack_type
     queue_count = var.network_interfaces[0].queue_count
 
     access_config {
@@ -23,12 +23,7 @@ resource "google_compute_instance" "this" {
     }
   }
 
-  metadata = merge(
-    var.metadata,
-    {
-      "ssh-keys" = var.ssh_key_content
-    }
-  )
+  metadata = var.metadata
 
   service_account {
     email  = var.service_account_email

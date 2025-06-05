@@ -1,87 +1,67 @@
 
 # Terraform VM-Series Deployment — Best Practices
 
-This document summarizes key best practices implemented in this repo for production-grade Terraform workflows.
+This repo implements enterprise-grade Terraform patterns for multi-environment Palo Alto VM-Series deployments on GCP.
 
 ---
 
-## ✅ Code Structure
+## ✅ Key Design Principles
 
-- Modularized reusable VM logic (`modules/vmseries`)
-- Environment-specific configuration under `environments/{env}/{instance}`
-- Automation scripts kept separate (`automation-scripts/`)
-- All variables strictly validated using `variables.tf`
-
----
-
-## ✅ Secrets & SSH Keys
-
-- No hardcoded SSH keys in any tfvars or variables files
-- SSH key loaded dynamically using `locals {}` inside `main.tf`:
-  ```hcl
-  locals {
-    ssh_key_content = file("${path.root}/../../../../gcp.key.pub")
-    ssh_public_keys = ["admin:${local.ssh_key_content} admin"]
-  }
-  ```
-- SSH keys read at runtime only, not stored in repo
+- ✅ Fully modular design (reusable `modules/vmseries`)
+- ✅ Fully validated variables (`variables.tf` with type & regex validation)
+- ✅ SSH keys handled via environment-local file injection (`gcp.key.pub`)
+- ✅ SSH key logic handled via `locals {}` in env-level `main.tf`
+- ✅ Module consumes fully pre-computed metadata (pure interface)
+- ✅ CMEK disk encryption fully supported (Google Cloud native pattern)
+- ✅ Separate persistent disk resource (`google_compute_disk`) for KMS encryption
+- ✅ All automation & scripting fully integrated via Makefile
 
 ---
 
-## ✅ Parser-Safe tfvars
+## ✅ Directory Structure
 
-- Only pure HCL used inside `terraform.tfvars` files
-- No function calls inside tfvars (compliant with Terraform parser)
-
----
-
-## ✅ Metadata Injection
-
-- Metadata block flattened for simplicity:
-  ```hcl
-  metadata = {
-    mgmt-interface-swap    = "enable"
-    serial-port-enable     = "true"
-    ssh-keys               = join("\n", var.ssh_public_keys)
-    block-project-ssh-keys = "true"
-  }
-  ```
+- `modules/vmseries` — core reusable module
+- `environments/dev|test|prod/vm-01` — instance-specific configurations
+- `automation-scripts/` — helper scripts to create new instances
+- `Makefile` — full automation entrypoint
+- `README.md` — operational usage guide
+- `validate.sh` — fast validation for CI/CD pipelines
 
 ---
 
-## ✅ Automation & Repeatability
+## ✅ SSH Key Handling Flow
 
-- Makefile simplifies repeatable init/apply/validate/destroy tasks
-- `create_instance.sh` script supports rapid environment cloning
-- Validation script (`validate.sh`) included for pre-deployment checks
-
----
-
-## ✅ Git Hygiene
-
-- `gcp.key.pub` excluded from Git — must exist at runtime
-- Repo safe for public or private Git repositories
-- Fully safe to push to GitHub, GitLab, Bitbucket
-
----
-
-## ✅ Release Management
-
-- `RELEASE_TAG_CHECKLIST.md` included for official tagging workflow
-- Semantic versioning recommended (v1.0.0, v1.1.0, etc)
+- SSH key read via:
+```hcl
+file("${path.module}/gcp.key.pub")
+```
+- Key merged into metadata block at environment-level `main.tf`:
+```hcl
+locals {
+  metadata = merge(var.metadata, {
+    ssh-keys = "admin:${local.ssh_key_content}"
+  })
+}
+```
 
 ---
 
-## ✅ Audit & Hand-off Documentation
+## ✅ CMEK (Customer Managed Encryption Keys)
 
-- `README.md` usage guide
-- `PRODUCTION_CHECKLIST.md` for operations handoff
-- `REPO_ARCHITECTURE.md` for repo structure documentation
-- `REPO_STRUCTURE_RECOMMENDATION.md` for team adoption
+- KMS keys supported via:
+```hcl
+google_compute_disk.boot_disk with dynamic disk_encryption_key
+```
+- Disk encryption key default provided in `terraform.tfvars`
+- Optional override supported per environment
 
 ---
 
-## ✅ Summary
+## ✅ Fully CI/CD-Safe Patterns
 
-> This repo fully implements production-grade Terraform patterns for real-world multi-instance VM deployments on GCP, with strong compliance, security, and team onboarding support.
+- No interactive prompts required during apply or plan
+- Makefile ensures consistent environment creation and updates
+- `make replace-ssh-key SSH_KEY_FILE=...` auto-populates keys across environments
+
+---
 

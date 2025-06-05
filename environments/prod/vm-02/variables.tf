@@ -61,7 +61,7 @@ variable "boot_disk_size" {
 
 variable "boot_disk_type" {
   type        = string
-  description = "Boot disk type (pd-ssd, pd-standard)"
+  description = "Boot disk type (pd-ssd, pd-standard, pd-balanced)"
   validation {
     condition     = contains(["pd-ssd", "pd-standard", "pd-balanced"], var.boot_disk_type)
     error_message = "Boot disk type must be one of: pd-ssd, pd-standard, pd-balanced."
@@ -106,4 +106,15 @@ variable "ssh_key_file" {
   type        = string
   description = "Relative path to SSH public key file"
   default     = "gcp.key.pub"
+}
+
+variable "ssh_public_keys" {
+  type = list(string)
+  description = "List of SSH public keys (required)"
+}
+
+variable "disk_encryption_key" {
+  type        = string
+  description = "Optional KMS disk encryption key resource ID"
+  default     = null
 }

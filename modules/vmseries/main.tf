@@ -1,4 +1,20 @@
 
+resource "google_compute_disk" "boot_disk" {
+  name  = "${var.instance_name}-boot-disk"
+  type  = var.boot_disk_type
+  zone  = var.zone
+  size  = var.boot_disk_size
+
+  dynamic "disk_encryption_key" {
+    for_each = var.disk_encryption_key != null ? [var.disk_encryption_key] : []
+    content {
+      kms_key_self_link = disk_encryption_key.value
+    }
+  }
+
+  physical_block_size_bytes = 4096
+}
+
 resource "google_compute_instance" "this" {
   name         = var.instance_name
   project      = var.project
@@ -13,11 +29,7 @@ resource "google_compute_instance" "this" {
   boot_disk {
     auto_delete = true
     device_name = "${var.instance_name}-boot"
-    initialize_params {
-      image = var.image
-      size  = var.boot_disk_size
-      type  = var.boot_disk_type
-    }
+    source      = google_compute_disk.boot_disk.id
   }
 
   metadata = {

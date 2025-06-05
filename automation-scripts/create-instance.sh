@@ -3,29 +3,43 @@
 
 set -e
 
-if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <environment> <instance-name> <ssh-key-file>"
-  exit 1
-fi
-
 ENV=$1
 INSTANCE=$2
 SSH_KEY_FILE=$3
 
-SRC_DIR="./environments/default/vm-template"
-DST_DIR="./environments/${ENV}/${INSTANCE}"
+if [ -z "$ENV" ] || [ -z "$INSTANCE" ] || [ -z "$SSH_KEY_FILE" ]; then
+  echo "Usage: $0 <ENV> <INSTANCE> <SSH_KEY_FILE>"
+  exit 1
+fi
 
-mkdir -p "${DST_DIR}"
-cp -r ${SRC_DIR}/* "${DST_DIR}/"
+INSTANCE_DIR="./environments/${ENV}/${INSTANCE}"
 
-# Replace placeholders
-sed -i.bak "s|<ENVIRONMENT>|${ENV}|g" "${DST_DIR}/terraform.tfvars"
-sed -i.bak "s|<INSTANCE>|${INSTANCE}|g" "${DST_DIR}/terraform.tfvars"
-rm "${DST_DIR}/terraform.tfvars.bak"
+if [ -d "$INSTANCE_DIR" ]; then
+  echo "Instance directory ${INSTANCE_DIR} already exists!"
+  exit 1
+fi
 
-# Inject SSH key content directly into tfvars
-SSH_KEY_CONTENT=$(cat ./gcp.key.pub)
-sed -i.bak "s|REPLACE_ME_SSH_KEY_CONTENT|admin:${SSH_KEY_CONTENT}|" "${DST_DIR}/terraform.tfvars"
-rm "${DST_DIR}/terraform.tfvars.bak"
+# Create instance directory based on template
+cp -r ./environments/default/vm-template "$INSTANCE_DIR"
 
-echo "✅ Created new instance configuration at ${DST_DIR}"
+# Verify template file exists
+if [ ! -f "${INSTANCE_DIR}/terraform.tfvars.template.final" ]; then
+  echo "ERROR: Missing template file: ${INSTANCE_DIR}/terraform.tfvars.template.final"
+  exit 1
+fi
+
+# Extract project value from template file
+PROJECT=$(grep '^project' ${INSTANCE_DIR}/terraform.tfvars.template.final | awk -F'"' '{print $2}')
+IMAGE_NAME="${ENV}-${INSTANCE}-custom-image"
+SOURCE_IMAGE="projects/${PROJECT}/global/images/${IMAGE_NAME}"
+
+# Read SSH key content and safely escape
+SSH_KEY_CONTENT=$(cat ${SSH_KEY_FILE} | sed -e 's/[\/&]/\\&/g')
+
+# Build safe labels block (with comma fix)
+LABELS="{ environment = \"${ENV}\", instance = \"${INSTANCE}\" }"
+
+# Perform substitutions
+sed -e "s|__ENV__|${ENV}|g"     -e "s|__INSTANCE__|${INSTANCE}|g"     -e "s|__SOURCE_IMAGE__|${SOURCE_IMAGE}|g"     -e "s|__SSH_KEY_CONTENT__|${SSH_KEY_CONTENT}|g"     -e "s|__LABELS__|${LABELS}|g"     ${INSTANCE_DIR}/terraform.tfvars.template.final > ${INSTANCE_DIR}/terraform.tfvars
+
+echo "Instance ${ENV}/${INSTANCE} created successfully."

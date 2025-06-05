@@ -104,8 +104,5 @@ variable "service_account_scopes" {
 
 variable "ssh_public_keys" {
   type = list(string)
-  description = "List of SSH public keys"
-  default = [
-    "admin:${file("${path.root}/../../../../gcp.key.pub")} admin"
-  ]
+  description = "List of SSH public keys (required)"
 }

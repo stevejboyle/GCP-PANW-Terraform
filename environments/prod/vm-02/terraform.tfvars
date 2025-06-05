@@ -4,18 +4,18 @@ region  = "us-east1"
 zone    = "us-east1-b"
 instance_name = "prod-vm-02"
 machine_type  = "c2-standard-16"
-labels = { environment = "prod", instance = "vm-02" }
+labels = {{ environment = "prod", instance = "vm-02" }}
 image = "projects/mpi-paloaltonetworksgcp-public/global/images/vmseries-flex-byol-1123h3"
 boot_disk_size = 60
 boot_disk_type = "pd-ssd"
-metadata = {
+metadata = {{
   mgmt-interface-swap = "enable"
   serial-port-enable  = "true"
-}
+}}
 network_interfaces = [
-  { subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/outside", stack_type = "IPV4_ONLY", queue_count = 0, has_public = true, network_tier = "PREMIUM" },
-  { subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/mgmt-sn", stack_type = "IPV4_ONLY", queue_count = 0, has_public = true, network_tier = "PREMIUM" },
-  { subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/inside", stack_type = "IPV4_ONLY", queue_count = 0, has_public = false, network_tier = "" }
+  {{ subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/outside", stack_type = "IPV4_ONLY", queue_count = 0, has_public = true, network_tier = "PREMIUM" }},
+  {{ subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/mgmt-sn", stack_type = "IPV4_ONLY", queue_count = 0, has_public = true, network_tier = "PREMIUM" }},
+  {{ subnetwork = "projects/sboyle-panw-test/regions/us-east1/subnetworks/inside", stack_type = "IPV4_ONLY", queue_count = 0, has_public = false, network_tier = "" }}
 ]
 service_account_email = "283940809712-compute@developer.gserviceaccount.com"
 service_account_scopes = [
@@ -27,5 +27,5 @@ service_account_scopes = [
 ]
 
 ssh_public_keys = [
-  "admin:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2BBnFtrO3Zgw7z4LtM9LmcbITrPE9HtPGfg8XC41NG7ePAbeaTlqrn8THWVjMJOHrzxVBDjGOTcaBQOWCAOkBOpxlPh7hM9uUZEM4X6PbjQ/rt5FgfOEAWwGPzec5oRefqRL2HPf61dHLhFTqvuWtmP2dS1ZHLdtlNN6RSIigsy5Dqb1jCEEYJ8hypl3U47xjlAoyyG0KmopCcbb0daML+ROrA54M2jc5utxo8VsaxP8bqT5+0X6yYCVCoGfDLxexw0ikIXxBNc8WbsI5RfJYycPtY9AM8nvJ+XUTVpOvvmw0mpF7dazy9AyNANUlsJEMeFxGMgin4f5nnK1NUhYXbhE5 admin"
+  "admin:${file("${path.root}/../../../../gcp.key.pub")} admin"
 ]

@@ -3,20 +3,17 @@ locals {
   disk_encryption_key_full = var.disk_encryption_key_name != null ? "projects/${var.project}/locations/${var.region}/keyRings/${var.disk_encryption_keyring}/cryptoKeys/${var.disk_encryption_key_name}" : null
 }
 
-resource "google_compute_disk" "boot_disk" {
-  name  = "${var.instance_name}-boot-disk"
-  type  = var.boot_disk_type
-  zone  = var.zone
-  size  = var.boot_disk_size
+resource "google_compute_image" "custom_image" {
+  name        = "${var.instance_name}-custom-image"
+  project     = var.project
+  source_image = var.image
 
-  dynamic "disk_encryption_key" {
+  dynamic "image_encryption_key" {
     for_each = local.disk_encryption_key_full != null ? [local.disk_encryption_key_full] : []
     content {
-      kms_key_self_link = disk_encryption_key.value
+      kms_key_self_link = image_encryption_key.value
     }
   }
-
-  physical_block_size_bytes = 4096
 }
 
 resource "google_compute_instance" "this" {
@@ -33,7 +30,11 @@ resource "google_compute_instance" "this" {
   boot_disk {
     auto_delete = true
     device_name = "${var.instance_name}-boot"
-    source      = google_compute_disk.boot_disk.id
+    initialize_params {
+      image = google_compute_image.custom_image.self_link
+      size  = var.boot_disk_size
+      type  = var.boot_disk_type
+    }
   }
 
   metadata = var.metadata

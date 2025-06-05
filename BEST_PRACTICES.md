@@ -1,31 +1,29 @@
 
-# Terraform VM-Series Deployment — Best Practices
+# Terraform VM-Series Deployment — Best Practices (Final CMEK Image Pattern)
 
-This repo implements enterprise-grade Terraform patterns for multi-environment Palo Alto VM-Series deployments on GCP.
+This repo implements enterprise-grade Terraform patterns for multi-environment Palo Alto VM-Series deployments on GCP, fully CMEK-compliant using Google's native image encryption pattern.
 
 ---
 
 ## ✅ Key Design Principles
 
-- ✅ Fully modular design (reusable `modules/vmseries`)
+- ✅ Fully modular design (`modules/vmseries`)
 - ✅ Fully validated variables (`variables.tf` with type & regex validation)
 - ✅ SSH keys handled via environment-local file injection (`gcp.key.pub`)
 - ✅ SSH key logic handled via `locals {}` in env-level `main.tf`
-- ✅ Module consumes fully pre-computed metadata (pure interface)
-- ✅ CMEK disk encryption fully supported (Google Cloud native pattern)
-- ✅ Separate persistent disk resource (`google_compute_disk`) for KMS encryption
+- ✅ CMEK encryption applied directly at image creation (`google_compute_image`)
+- ✅ Boot disks created automatically from CMEK-encrypted custom images (`initialize_params`)
+- ✅ No need for separate `google_compute_disk` resources
+- ✅ Fully supported by Google's Terraform provider (no unsupported block issues)
 - ✅ All automation & scripting fully integrated via Makefile
 
 ---
 
-## ✅ Directory Structure
+## ✅ CMEK Pattern Summary
 
-- `modules/vmseries` — core reusable module
-- `environments/dev|test|prod/vm-01` — instance-specific configurations
-- `automation-scripts/` — helper scripts to create new instances
-- `Makefile` — full automation entrypoint
-- `README.md` — operational usage guide
-- `validate.sh` — fast validation for CI/CD pipelines
+- A custom GCP image (`google_compute_image`) is dynamically created per VM instance.
+- CMEK encryption applied directly during custom image creation.
+- The compute instance uses the custom CMEK-encrypted image as its boot disk via `initialize_params`.
 
 ---
 
@@ -39,21 +37,11 @@ file("${path.module}/gcp.key.pub")
 ```hcl
 locals {
   metadata = merge(var.metadata, {
-    ssh-keys = "admin:${local.ssh_key_content}"
+    ssh-keys = "admin:${local.ssh_key_content}",
+    block-project-ssh-keys = "true"
   })
 }
 ```
-
----
-
-## ✅ CMEK (Customer Managed Encryption Keys)
-
-- KMS keys supported via:
-```hcl
-google_compute_disk.boot_disk with dynamic disk_encryption_key
-```
-- Disk encryption key default provided in `terraform.tfvars`
-- Optional override supported per environment
 
 ---
 
@@ -64,4 +52,3 @@ google_compute_disk.boot_disk with dynamic disk_encryption_key
 - `make replace-ssh-key SSH_KEY_FILE=...` auto-populates keys across environments
 
 ---
-

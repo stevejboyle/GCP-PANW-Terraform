@@ -1,5 +1,5 @@
 
-# Terraform Platform Release Process
+# Terraform Platform Release Process (Final CMEK Image Pattern)
 
 ---
 
@@ -30,3 +30,10 @@ git push origin v1.0.1
 
 ---
 
+## ✅ CMEK Management
+
+- The current design uses Google's recommended image-level CMEK encryption pattern.
+- Custom GCP images are created dynamically for each instance using `google_compute_image`.
+- CMEK is applied via the `image_encryption_key` block.
+
+---

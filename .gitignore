@@ -11,3 +11,7 @@ gcp.key*
 
 # OS
 .DS_Store
+
+# Test Files
+test.sh
+*.o

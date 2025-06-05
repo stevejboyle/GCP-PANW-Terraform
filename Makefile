@@ -1,33 +1,21 @@
 
-.PHONY: init apply destroy validate plan replace-ssh-key
+.PHONY: validate apply plan destroy
 
-ENV ?= dev
-INSTANCE ?= vm-01
-WORK_DIR=./environments/$(ENV)/$(INSTANCE)
-
-init:
-	cd $(WORK_DIR) && terraform init
-
-replace-ssh-key:
-	@if [ -z "$(SSH_KEY_FILE)" ]; then \
-		echo "❌ Must provide SSH_KEY_FILE=<path-to-your-key>"; \
-		exit 1; \
-	fi
-	@echo "🔑 Replacing gcp.key.pub across all environments using $(SSH_KEY_FILE)"
-	@find environments -name gcp.key.pub -exec cp $(SSH_KEY_FILE) {} \;
-	@echo "✅ Replacement complete."
-
-plan: init
-	cd $(WORK_DIR) && terraform plan
-
-apply: replace-ssh-key init
-	cd $(WORK_DIR) && terraform apply
-
-destroy: init
-	cd $(WORK_DIR) && terraform destroy
-
-validate: init
-	cd $(WORK_DIR) && terraform validate
 
 create-instance:
-	./automation-scripts/create_instance.sh $(ENV) $(INSTANCE)
+	./automation-scripts/create-instance.sh $(ENV) $(INSTANCE) $(SSH_KEY_FILE)
+
+apply:
+	ENV=$(ENV) INSTANCE=$(INSTANCE) ./automation-scripts/replace-ssh-key.sh $(ENV) $(INSTANCE) $(SSH_KEY_FILE)
+	cd ./environments/$(ENV)/$(INSTANCE) && TF_VAR_environment=$(ENV) terraform init
+	cd ./environments/$(ENV)/$(INSTANCE) && TF_VAR_environment=$(ENV) terraform apply
+
+plan:
+	cd ./environments/$(ENV)/$(INSTANCE) && TF_VAR_environment=$(ENV) terraform plan
+
+destroy:
+	cd ./environments/$(ENV)/$(INSTANCE) && TF_VAR_environment=$(ENV) terraform destroy
+
+validate:
+	terraform fmt -recursive
+	terraform validate

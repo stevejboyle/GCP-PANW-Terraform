@@ -7,7 +7,7 @@
 *.tfvars.backup
 
 # Keys
-gcp.key.*
+gcp.key*
 
 # OS
 .DS_Store

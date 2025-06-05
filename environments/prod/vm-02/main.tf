@@ -17,7 +17,8 @@ provider "google" {
 locals {
   ssh_key_content = file("${path.module}/gcp.key.pub")
   metadata = merge(var.metadata, {
-    ssh-keys = "admin:${local.ssh_key_content}"
+    ssh-keys = "admin:${local.ssh_key_content}",
+    block-project-ssh-keys = "true"
   })
 }
 
@@ -39,6 +40,7 @@ module "panw_vm" {
   service_account_scopes = var.service_account_scopes
   ssh_key_file           = var.ssh_key_file
   disk_encryption_key_name = var.disk_encryption_key_name
+  disk_encryption_keyring  = var.disk_encryption_keyring
 }
 
 output "instance_self_link" {

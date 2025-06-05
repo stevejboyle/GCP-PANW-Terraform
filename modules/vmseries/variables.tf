@@ -102,6 +102,13 @@ variable "service_account_scopes" {
   description = "OAuth scopes for the service account"
 }
 
+variable "ssh_key_file" {
+  type        = string
+  description = "Relative path to SSH public key file"
+  default     = "gcp.key.pub"
+}
+
+
 variable "ssh_public_keys" {
   type = list(string)
   description = "List of SSH public keys (required)"

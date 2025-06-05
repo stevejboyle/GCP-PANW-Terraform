@@ -1,64 +1,51 @@
 
-# Terraform VM-Series Multi-Instance Deployment (GCP)
+# Terraform VM-Series Enterprise Platform (CMEK + Default Template)
 
-Fully automated, fully validated Terraform deployment for Palo Alto VM-Series on GCP.
-
----
-
-## 🚀 Features
-
-- Multi-environment (`dev`, `test`, `prod`)
-- Multi-instance (deploy independently per instance)
-- CMEK disk encryption fully supported (via `disk_encryption_key`)
-- Fully validated variables (strict type + regex validation)
-- SSH key injection via local `gcp.key.pub` file per environment instance
-- SSH key automatically loaded using `locals {}`
-- `make apply` automatically updates SSH keys before deployment
-- Fully CI/CD-ready
+This repo implements enterprise-grade Terraform deployment of Palo Alto VM-Series on GCP with full CMEK encryption.
 
 ---
 
-## 🚀 Usage
+## ✅ Key Features
 
-### 1️⃣ Prepare SSH Key
+- CMEK applied at image-level encryption (google_compute_image)
+- Default reusable environment template located at: `environments/default/vm-template/`
+- `create-instance.sh` automation now pulls new instances from the default template
+- SSH keys injected via local metadata
+- Block project-wide SSH keys enabled
+- Fully CI/CD compatible design
 
-Before running apply, you must inject your SSH public key into all environment instances:
+---
+
+## ✅ Instance Creation Workflow
+
+To create a new instance config:
 
 ```bash
-make replace-ssh-key SSH_KEY_FILE=/path/to/your/gcp.key.pub
+./automation-scripts/create-instance.sh <environment> <instance-name> <region>
 ```
 
-### 2️⃣ Apply Instance
+Example:
 
 ```bash
-make apply ENV=dev INSTANCE=vm-01 SSH_KEY_FILE=/path/to/your/gcp.key.pub
-```
-
-### 3️⃣ Destroy Instance
-
-```bash
-make destroy ENV=dev INSTANCE=vm-01
-```
-
-### 4️⃣ Validate
-
-```bash
-make validate ENV=dev INSTANCE=vm-01
-```
-
-### 5️⃣ Create New Instance
-
-```bash
-make create-instance ENV=dev INSTANCE=vm-04
+./automation-scripts/create-instance.sh dev vm-02 us-east1
 ```
 
 ---
 
-## 🚀 CMEK Support
+## ✅ CMEK Encryption Flow
 
-By default, disk_encryption_key is set to `PA-VM-Disk-Crypt`. To override:
+- Custom GCP images are created dynamically per instance
+- CMEK keys applied directly at image creation
+- Boot disk created automatically from CMEK-encrypted image
 
-```hcl
-disk_encryption_key = "your-kms-resource-id"
-```
+---
 
+## ✅ Repo Structure
+
+- `modules/vmseries` — core reusable module
+- `environments/default/vm-template` — reusable golden template
+- `environments/dev|test|prod` — deployed environments
+- `automation-scripts/` — helper instance creation automation
+- `BEST_PRACTICES.md` / `RELEASE_PROCESS.md` — enterprise platform docs
+
+---

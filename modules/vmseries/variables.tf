@@ -119,3 +119,7 @@ variable "disk_encryption_keyring" {
   description = "KMS key ring name"
   default     = "US-East-1-KeyRing"
 }
+
+variable "environment" { type = string }
+
+variable "source_image" { type = string }

@@ -51,4 +51,8 @@ make delete-instance ENV=dev INSTANCE=vm-01
 
 - SSH keys are injected dynamically via `replace-ssh-key.sh`.
 - CMEK defaults: `PA-VM-Disk-Crypt` and `US-East-1-KeyRing` (can be overridden).
-- Default image: Palo Alto BYOL 10.1.1 (`vmseries-byol-1011`).
+- Default image: Palo Alto BYOL 11.2.3-h3 (`vmseries-byol-1123h3`).
+
+## Disclaimer
+
+This is unsupported code and is a sample to be used by the community.   This is my personal project and in no way should be construed as representative of a work by my employer.

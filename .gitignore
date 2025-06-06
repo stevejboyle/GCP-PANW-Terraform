@@ -13,5 +13,7 @@ gcp.key*
 .DS_Store
 
 # Test Files
-test.sh
+login.sh
+deploy.sh
+destroy.sh
 *.o
